@@ -18,15 +18,28 @@ func getMockedProcess(p string, args ...string) *Process {
 }
 
 func TestProcessNew(t *testing.T) {
-	p := New(context.TODO(), 3, "ls", "-alh")
+	p := New(context.TODO(), "ls", "-alh")
 	assert.NotNil(t, p)
 	assert.Equal(t, p.rc, 3)
+}
+
+func TestProcess_SetRetryConfigs(t *testing.T) {
+	p := getMockedProcess("ls", "-alh")
+	p.SetRetryConfigs(10, 200)
+	assert.Equal(t, p.rc, 10)
+	assert.Equal(t, p.ridms, 200)
 }
 
 func TestProcess_Start(t *testing.T) {
 	p := getMockedProcess("ls", "-alh")
 	err := p.Start()
 	assert.NoError(t, err, "error")
+}
+
+func TestProcessJitter(t *testing.T) {
+	p := getMockedProcess("ls", "-alh")
+	p.ridms = 0
+	assert.Equal(t, p.jitter(), 0)
 }
 
 func TestIntegration(t *testing.T) {

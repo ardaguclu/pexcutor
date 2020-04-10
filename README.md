@@ -5,14 +5,15 @@
 Pexcutor is a Go library for managing external processes.
 
 * It has an ability to stop external process, when the caller is cancelled/completed/returned.
-* It has an retry mechanism for possible crash and it restarts again according to the given retry count value by caller.
+* It has retry mechanism for possible crash. It restarts again according to the given retry count value by caller.
 * Signals can be passed directly to the external processes.
 * It listens termination signals handled by caller and cancel external process via context cancelling.
 
 ## USAGE
 
     ctx, cancel := context.WithCancel(context.Background())
- 	p := pexcutor.New(ctx, 3, "ls", "-alh")
+ 	p := pexcutor.New(ctx, "ls", "-alh")
+    p.SetRetryConfigs(5, 100)
  	err := p.Start()
  	if err != nil {
  		log.Fatal("Start error ", err)
@@ -30,4 +31,15 @@ Pexcutor is a Go library for managing external processes.
 
 `go test -race -cover ./...`
 
-* Unit tests and integrations tests are implemented into the process_test package and currently code coverage is approximately %83.
+* Unit tests and integrations tests are implemented into the process_test package and currently code coverage is greater than 70%.
+
+## NOTES
+
+backoff strategy algorithm is implemented manually such that;
+
+Default initial delay is 10 milliseconds and can be changed. In order to add randomization into the backoff strategy jitter function has been used.
+
+formula is;
+
+`val := initial retry delay in ms * current retry count
+val/2  + random 0..val`

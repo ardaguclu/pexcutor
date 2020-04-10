@@ -24,7 +24,8 @@ func main() {
 		}
 	}()
 
-	p := pexcutor.New(ctx, 3, "ls", "-alh")
+	p := pexcutor.New(ctx, "ls", "-alh")
+	p.SetRetryConfigs(5, 100)
 	err := p.Start()
 	if err != nil {
 		log.Fatal("start error ", err)

@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"sync"
 	"syscall"
+	"time"
 )
 
 // Process stores pexcutor related internal fields like command, retry-recovery procedure, etc.
@@ -18,6 +20,7 @@ type Process struct {
 	args   []string        // args passed to path
 	envs   []string        // optional environment variables
 	rc     int             // retry count when the process crashes
+	ridms  int             // retry initial delay determines backoff delay in terms of milliseconds.
 	crc    int             // current retry count which is incremented for each retry
 	cmd    *exec.Cmd       // external process command
 	ctx    context.Context // storing context in struct field is not the best practice, but in retry cases, in order to guarantee that same context is used, best option is storing context in here.
@@ -26,14 +29,21 @@ type Process struct {
 }
 
 // New creates command and returns Process with given initialized values.
-func New(ctx context.Context, retryCount int, path string, args ...string) *Process {
+func New(ctx context.Context, path string, args ...string) *Process {
 	return &Process{
-		ctx:  ctx,
-		path: path,
-		args: args,
-		rc:   retryCount,
-		crc:  0,
+		ctx:   ctx,
+		path:  path,
+		args:  args,
+		rc:    3,
+		ridms: 10,
+		crc:   0,
 	}
+}
+
+// SetRetryConfigs sets retry related configurations.
+func (p *Process) SetRetryConfigs(retryCount, retryInitialDelay int) {
+	p.ridms = retryInitialDelay
+	p.rc = retryCount
 }
 
 // SetEnv sets environment variables for command
@@ -105,9 +115,14 @@ func (p *Process) GetResult() (string, string, error) {
 	if err := p.cmd.Wait(); err != nil {
 		if eErr, ok := err.(*exec.ExitError); ok {
 			st := eErr.ProcessState.Sys().(syscall.WaitStatus)
+
+			// We are not retrying other cases. CoreDump means that the possible crash of external process (due to the memory size limit or storage, etc.)
+			// and we can start retry mechanism. However, in other cases like exited or stopped, etc. user or main process can explicitly kill
+			// process and in that case, we should not start process again.
 			if st.CoreDump() && p.crc < p.rc {
 				log.Println("crashed ", eErr, " process will be restarted")
 				p.crc++
+				time.Sleep(time.Duration(p.jitter()) * time.Millisecond)
 				err = p.Start()
 				if err != nil {
 					return stdOut, stdErr, err
@@ -146,4 +161,14 @@ func (p *Process) Signal(sig os.Signal) error {
 	}
 
 	return p.cmd.Process.Signal(sig)
+}
+
+func (p *Process) jitter() int {
+	if p.ridms == 0 {
+		return 0
+	}
+
+	v := p.ridms * p.crc
+
+	return v/2 + rand.Intn(v)
 }
