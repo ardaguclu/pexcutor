@@ -14,6 +14,11 @@ import (
 	"time"
 )
 
+const (
+	DefaultRetryCount = 3
+	DefaultRetryDelay = 10
+)
+
 // Process stores pexcutor related internal fields like command, retry-recovery procedure, etc.
 type Process struct {
 	path   string          // execution path which can be defined $PATH, or relative path being searched with lookpath
@@ -34,8 +39,8 @@ func New(ctx context.Context, path string, args ...string) *Process {
 		ctx:   ctx,
 		path:  path,
 		args:  args,
-		rc:    3,
-		ridms: 10,
+		rc:    DefaultRetryCount,
+		ridms: DefaultRetryDelay,
 		crc:   0,
 	}
 }
