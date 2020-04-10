@@ -105,8 +105,8 @@ func (p *Process) GetResult() (string, string, error) {
 	if err := p.cmd.Wait(); err != nil {
 		if eErr, ok := err.(*exec.ExitError); ok {
 			st := eErr.ProcessState.Sys().(syscall.WaitStatus)
-			if (st.Exited() || st.CoreDump()) && p.crc < p.rc {
-				log.Println("crash error ", eErr, " process will be restarted")
+			if st.CoreDump() && p.crc < p.rc {
+				log.Println("crashed ", eErr, " process will be restarted")
 				p.crc++
 				err = p.Start()
 				if err != nil {
