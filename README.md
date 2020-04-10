@@ -5,7 +5,7 @@
 Pexcutor is a Go library for managing external processes.
 
 * It has an ability to stop external process, when the caller is cancelled/completed/returned.
-* It has retry mechanism for possible crash. It restarts again according to the given retry count value by caller.
+* It has retry mechanism for possible crashes. It restarts again according to the given retry count value by caller.
 * Signals can be passed directly to the external processes.
 * It listens termination signals handled by caller and cancel external process via context cancelling.
 
@@ -41,5 +41,6 @@ Default initial delay is 10 milliseconds and can be changed. In order to add ran
 
 formula is;
 
-`val := initial retry delay in ms * current retry count
-val/2  + random 0..val`
+`val := initial retry delay in ms * current retry count`
+
+`backoff = val/2  + random 0..val`
