@@ -26,21 +26,21 @@ func TestProcessNew(t *testing.T) {
 func TestProcess_Start(t *testing.T) {
 	p := getMockedProcess("ls", "-alh")
 	err := p.Start()
-	assert.NoError(t, err, "error occured")
+	assert.NoError(t, err, "error")
 }
 
 func TestIntegration(t *testing.T) {
 	p := getMockedProcess("date")
 	p.SetEnv("TEST_ENV=VALUE")
 	err := p.Start()
-	assert.NoError(t, err, "error occured")
+	assert.NoError(t, err, "error")
 	_, _, err = p.GetResult()
-	assert.NoError(t, err, "error occured")
+	assert.NoError(t, err, "error")
 	err = p.Stop()
 	assert.Error(t, err, "process should already be stopped")
 	p = getMockedProcess("date", "invalid args")
 	err = p.Start()
-	assert.NoError(t, err, "error occured")
+	assert.NoError(t, err, "error")
 	_, _, err = p.GetResult()
-	assert.Error(t, err, "error occured")
+	assert.Error(t, err, "error")
 }

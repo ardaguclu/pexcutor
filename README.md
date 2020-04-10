@@ -1,11 +1,15 @@
-pexcutor is a Go library for managing external processes.
+[![GoDoc](https://godoc.org/github.com/ardaguclu/pexcutor?status.png)](https://godoc.org/github.com/ardaguclu/pexcutor)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ardaguclu/pexcutor)](https://goreportcard.com/report/github.com/ardaguclu/pexcutor)
+
+
+Pexcutor is a Go library for managing external processes.
 
 * It has an ability to stop external process, when the caller is cancelled/completed/returned.
 * It has an retry mechanism for possible crash and it restarts again according to the given retry count value by caller.
-* Signals can be directly to the external processes.
+* Signals can be passed directly to the external processes.
 * It listens termination signals handled by caller and cancel external process via context cancelling.
 
-USAGE
+## USAGE
 
     ctx, cancel := context.WithCancel(context.Background())
  	p := pexcutor.New(ctx, 3, "ls", "-alh")
@@ -22,7 +26,7 @@ USAGE
  	log.Println(sOut)
  	log.Println(sErr)
  
-TESTING
+## TESTING
 
 `go test -race -cover ./...`
 

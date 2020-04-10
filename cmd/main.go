@@ -27,12 +27,12 @@ func main() {
 	p := pexcutor.New(ctx, 3, "ls", "-alh")
 	err := p.Start()
 	if err != nil {
-		log.Fatal("start error occured ", err)
+		log.Fatal("start error ", err)
 	}
 
 	sOut, sErr, err := p.GetResult()
 	if err != nil {
-		log.Fatal("get result error occured ", err)
+		log.Fatal("get result error ", err)
 	}
 
 	log.Println(sOut)
